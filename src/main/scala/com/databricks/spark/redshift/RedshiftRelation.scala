@@ -74,7 +74,7 @@ case class RedshiftRelation(jdbcWrapper: JDBCWrapper, params: MergedParameters, 
     val query = s"SELECT $columnList FROM ${params.table} $whereClause"
     val fixedUrl = Utils.fixS3Url(params.tempPath)
 
-    s"UNLOAD ('$query') TO '$fixedUrl' WITH CREDENTIALS '$credsString' ESCAPE ALLOWOVERWRITE"
+    s"UNLOAD ('$query') TO '$fixedUrl' CREDENTIALS '$credsString' ESCAPE ALLOWOVERWRITE"
   }
 
   protected def makeRdd(schema: StructType): RDD[Row] = {

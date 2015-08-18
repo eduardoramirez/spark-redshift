@@ -174,25 +174,24 @@ private [redshift] object Parameters extends Logging {
       val scheme = new URI(tempDir).getScheme
       val hadoopConfPrefix = s"fs.$scheme"
 
-      val (accessKeyId, secretAccessKey) =
+      val (accessKeyId, secretAccessKey, securitytoken) =
         if(parameters.contains("aws_access_key_id")) {
           log.info("Using credentials provided in parameter map.")
-          (parameters("aws_access_key_id"), parameters("aws_secret_access_key"))
+          (parameters("aws_access_key_id"), parameters("aws_secret_access_key"), parameters("aws_security_token"))
         } else if (configuration.get(s"$hadoopConfPrefix.awsAccessKeyId") != null) {
           log.info(s"Using hadoopConfiguration credentials for scheme $scheme}")
           (configuration.get(s"$hadoopConfPrefix.awsAccessKeyId"),
-            configuration.get(s"$hadoopConfPrefix.awsSecretAccessKey"))
+            configuration.get(s"$hadoopConfPrefix.awsSecretAccessKey"), "")
         } else {
           try {
             log.info(s"Using default provider chain for AWS credentials, as none provided explicitly.")
             val awsCredentials = (new DefaultAWSCredentialsProviderChain).getCredentials
-            (awsCredentials.getAWSAccessKeyId, awsCredentials.getAWSSecretKey)
+            (awsCredentials.getAWSAccessKeyId, awsCredentials.getAWSSecretKey, "")
           } catch {
             case e: Exception => throw new Exception("No credentials provided and unable to detect automatically.", e)
           }
         }
-
-      s"aws_access_key_id=$accessKeyId;aws_secret_access_key=$secretAccessKey"
+      s"aws_access_key_id=$accessKeyId;aws_secret_access_key=$secretAccessKey;token=$securitytoken"
     }
   }
 }
